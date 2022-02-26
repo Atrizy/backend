@@ -1,12 +1,14 @@
 import mariadb as db
 import dbinteractions as dbi
 
-def insert_post(content, user_id):
+def insert_post(login_token, content):
     success = False
     id = None
     conn, cursor = dbi.connect_db()
     try:
-        cursor.execute("INSERT INTO tweet(content, user_id) VALUES(?,?)", [content, user_id])
+        cursor.execute("SELECT user_id FROM user_session WHERE login_token=?", [login_token])
+        user = cursor.fetchone()
+        cursor.execute("INSERT INTO tweet(user_id, content) VALUES(?,?)", [user[0], content])
         conn.commit()
         if(cursor.rowcount == 1):
             success = True
