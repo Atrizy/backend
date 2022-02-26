@@ -1,7 +1,7 @@
 import mariadb as db
 import dbinteractions as dbi
 
-def insert_comment(login_token, content ):
+def insert_comment(login_token, content):
     success = False
     id = None
     conn, cursor = dbi.connect_db()

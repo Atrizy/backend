@@ -2,6 +2,7 @@ import tweets as tw
 import signup as su
 import follow as fol
 import comments as cm
+import likes as lk
 from flask import Flask, request, Response
 import json
 import dbinteractions as db
@@ -91,6 +92,31 @@ def create_user():
     except:
         return Response("Something went horribly wrong please call someone", mimetype="plain/text", status=500)
 
+@app.get("/api/comment_likes")
+def get_comments_likes():
+    try:
+        comment_id = request.args["comment_id"]
+        success, post = lk.get_comment_like(comment_id)
+        if(success):
+            comment_likes_json = json.dumps(post, default=str)
+            return Response(comment_likes_json, mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.get("/api/tweet_likes")
+def get_tweet_likes():
+    try:
+        tweet_id = request.args["tweet_id"]
+        success, post = lk.get_tweet_like(tweet_id)
+        if(success):
+            tweet_likes_json = json.dumps(post, default=str)
+            return Response(tweet_likes_json, mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
 
 @app.get("/api/post")
 def get_blog_post():
