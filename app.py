@@ -1,5 +1,7 @@
+from sre_constants import SUCCESS
 import tweets as tw
 import signup as su
+import login as log
 import follow as fol
 import comments as cm
 import likes as lk
@@ -92,6 +94,25 @@ def create_user():
     except:
         return Response("Something went horribly wrong please call someone", mimetype="plain/text", status=500)
 
+@app.post("/api/user_login")
+def login():
+    try:
+        email = request.json['email']
+        password = request.json['password']
+        success, id, login_token = log.login_user(email, password)
+        if(success):
+            user_json = json.dumps({
+                "user_id": id,
+                "email": email,
+                "password": password,
+                "login_token": login_token
+            })
+            return Response(user_json, mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Something went horribly wrong please call someone", mimetype="plain/text", status=500)
+
 @app.get("/api/comment_likes")
 def get_comments_likes():
     try:
@@ -130,6 +151,130 @@ def get_blog_post():
     except:
         return Response("Sorry Please try again", mimetype="plain/text", status=500)
 
+@app.patch("/api/users")
+def patch_user_profile():
+    try:
+        email = request.json['email']
+        username = request.json['username']
+        bio = request.json['bio']
+        dob = request.json['dob']
+        pfp = request.json.get('pfp')
+        profile_banner = request.json.get("profile_banner")
+        login_token = request.json["login_token"]
+        success = su.patch_user_info(login_token, email, username, bio, dob, pfp, profile_banner)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.patch("/api/post")
+def patch_tweet_information():
+    try:
+        id = request.json["id"]
+        content = request.json["content"]
+        login_token = request.json["login_token"]
+        success = tw.patch_tweet_info(login_token, content, id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.patch("/api/comments")
+def patch_comment_information():
+    try:
+        id = request.json["id"]
+        content = request.json["content"]
+        login_token = request.json["login_token"]
+        success = cm.patch_comment_info(login_token, content, id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/follows")
+def delete_follow():
+    try:
+        login_token = request.json["login_token"]
+        unfollowed_user = request.json["followed_user_id"]
+        success = fol.unfollow_user(login_token, unfollowed_user)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/post")
+def delete_tweet():
+    try:
+        login_token = request.json["login_token"]
+        id = request.json["id"]
+        success = tw.delete_tweet(login_token, id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/comments")
+def delete_comment():
+    try:
+        login_token = request.json["login_token"]
+        id = request.json["id"]
+        success = cm.delete_comment(login_token, id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/tweet_likes")
+def delete_tweet_like():
+    try:
+        login_token = request.json["login_token"]
+        id = request.json["id"]
+        tweet_id = request.json["tweet_id"]
+        success = lk.delete_tweet_like(login_token, id, tweet_id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/comment_likes")
+def delete_comment_like():
+    try:
+        login_token = request.json["login_token"]
+        id = request.json["id"]
+        comment_id = request.json["comment_id"]
+        success = lk.delete_comment_like(login_token, id, comment_id)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
+
+@app.delete("/api/users")
+def delete_user():
+    try:
+        login_token = request.json["login_token"]
+        success = log.delete_user(login_token)
+        if(success):
+            return Response(mimetype="application/json", status=200)
+        else:
+            return Response("Please try again", mimetype="plain/text", status=400)
+    except:
+        return Response("Sorry Please try again", mimetype="plain/text", status=500)
 
 if(len(sys.argv) > 1):
     mode = sys.argv[1]
